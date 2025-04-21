@@ -1,6 +1,9 @@
 .DS_Store
 node_modules
 /dist
+.devbox
+devbox.json
+devbox.lock
 
 
 # local env files
