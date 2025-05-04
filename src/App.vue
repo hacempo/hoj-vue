@@ -1,14 +1,14 @@
 <template>
   <div id="app">
     <el-backtop :right="10"></el-backtop>
-    <div v-if="!isAdminView" class="full-height flex-column">
-      <NavBar></NavBar>
+    <div v-if="!isAdminView" :class="{'full-height flex-column': !isInIframe}">
+      <NavBar v-if="!isInIframe"></NavBar>
       <div id="oj-content">
         <transition name="el-zoom-in-bottom">
           <router-view></router-view>
         </transition>
       </div>
-      <footer v-if="showFooter" class="fix-to-bottom">
+      <footer v-if="showFooter && !isInIframe" class="fix-to-bottom">
         <div class="mundb-footer">
           <el-row>
             <el-col
@@ -121,6 +121,7 @@
         </transition>
       </div>
     </div>
+    <floating-ball v-if="!isInIframe"/>
   </div>
 </template>
 
@@ -130,15 +131,18 @@ import { mapActions, mapState, mapGetters } from "vuex";
 import { LOGO, MOTTO } from "@/common/logo";
 import storage from "@/common/storage";
 import utils from "@/common/utils";
+import FloatingBall from './components/FloatingBall.vue'
 export default {
   name: "app-content",
   components: {
     NavBar,
+    FloatingBall,
   },
   data() {
     return {
       isAdminView: false,
       showFooter: true,
+      isInIframe: false,
     };
   },
   methods: {
@@ -237,6 +241,7 @@ export default {
   created: function () {
     this.$nextTick(function () {
       try {
+        this.isInIframe = window.self !== window.top
         document.body.removeChild(document.getElementById("app-loader"));
       } catch (e) {}
     });
