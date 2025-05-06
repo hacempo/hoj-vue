@@ -251,6 +251,14 @@ export default {
   z-index: 9999;
 }
 
+/* 修复 Element UI 的默认样式 */
+.card-content >>> .el-card__body {
+  padding: 0 !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 .card-content {
   padding: 16px;
   box-sizing: border-box;
