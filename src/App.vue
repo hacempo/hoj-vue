@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <el-backtop :right="10"></el-backtop>
+    <el-backtop :right="10" v-if="!isInIframe"></el-backtop>
     <div v-if="!isAdminView" :class="{'full-height flex-column': !isInIframe}">
       <NavBar v-if="!isInIframe"></NavBar>
       <div id="oj-content">
