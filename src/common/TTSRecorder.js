@@ -107,7 +107,7 @@ export default class TTSRecorder {
         jsonData.payload.choices.text.forEach(res => {
             // this.msgStore.aiAddMsg(res.content, jsonData.header.status)
             store.dispatch("aiAddMsg",{'content':res.content, 'status':jsonData.header.status});
-            this.msgDom.scrollTop = this.msgDom.scrollHeight + 500
+            if(this.msgDom)this.msgDom.scrollTop = this.msgDom.scrollHeight + 500
         })
         // 提问失败
         if (jsonData.header.code !== 0) {

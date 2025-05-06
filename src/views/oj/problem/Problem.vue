@@ -216,6 +216,34 @@
                     </Markdown>
                   </template>
 
+                  <template v-if="problemData.problem.description">
+                    <!-- 使用ElementUI的按钮组件 -->
+                    <div class="action-buttons">
+                      <el-button
+                        type="primary"
+                        icon="el-icon-search"
+                        @click="analyzeQuestion"
+                        :loading="isAnalyzing"
+                      >
+                        {{ isAnalyzing ? '分析中...' : 'AI分析题目' }}
+                      </el-button>
+                    </div>
+
+                        <!-- 分析结果展示 -->
+                    <el-collapse v-model="activeCollapse" v-if="analysisResult">
+                      <el-collapse-item title="题目分析" name="analysis">
+                        <div class="analysis-result">
+                          <el-alert
+                            :title="analysisResult.title"
+                            type="success"
+                            :closable="false"
+                          />
+                          <Markdown class="analysis-content" :content="analysisResult.content"></Markdown>
+                        </div>
+                      </el-collapse-item>
+                    </el-collapse>
+                  </template>
+
                   <template v-if="problemData.problem.input">
                     <p class="title">{{ $t('m.Input') }}</p>
                     <Markdown 
@@ -854,6 +882,7 @@ import CodeMirror from "@/components/oj/common/CodeMirror.vue";
 import Pagination from "@/components/oj/common/Pagination";
 import ProblemHorizontalMenu from "@/components/oj/common/ProblemHorizontalMenu";
 import Markdown from "@/components/oj/common/Markdown";
+import TTSRecorder from "@/common/TTSRecorder";
 // 只显示这些状态的图形占用
 const filtedStatus = ["wa", "ce", "ac", "pa", "tle", "mle", "re", "pe"];
 
@@ -929,6 +958,15 @@ export default {
       openTestCaseDrawer: false,
       openFocusMode: false,
       showProblemHorizontalMenu: false,
+
+
+      //new
+      isAnalyzing: false,
+      analysisResult: null,
+      activeCollapse: [],
+      msgValue: "",
+      msgList: [],
+      ttsRecorder: new TTSRecorder(),
     };
   },
   created() {
@@ -957,6 +995,10 @@ export default {
     window.onresize = () => {
       this.resizeWatchHeight();
     };
+
+
+    //new
+    this.msgList = this.$store.state.msgStore.list;
   },
   methods: {
     ...mapActions(["changeDomTitle"]),
@@ -1753,7 +1795,35 @@ export default {
         fontSize: this.fontSize,
         tabSize: this.tabSize,
       });
-    }
+    },
+
+
+
+    //new
+    analyzeQuestion() {
+      // this.problemData.problem.description='给定一个字符串，判断它是否是回文字符串。';
+      this.isAnalyzing = true;
+      this.$store.dispatch("userAddMsg", '我想让你帮我分析一下算法题目，按三点分析，为考察知识点、解题思路以及常见错误，输出的结果为markdown格式，不需要其他内容，只需要三点就行；接下来我将给出题目：'+this.problemData.problem.description);
+      this.$store.state.msgStore.isChated = true;
+      this.ttsRecorder.start(this.$store.state.msgStore, null);
+      // 强制等待15秒
+      setTimeout(() => {
+        this.analysisResult = {
+          title: '分析结果',
+          content: this.msgList[this.msgList.length-1].content
+        }
+        this.activeCollapse = ['analysis']
+        this.isAnalyzing = false
+        
+        // 显示成功消息
+        this.$message({
+          message: '题目分析完成',
+          type: 'success'
+        })
+        
+      }, 15000)
+
+    },
   },
   computed: {
     ...mapGetters([
